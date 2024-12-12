@@ -181,7 +181,7 @@ int main() {
             searchBook(&InventoryLib, bookID);
         } else if (choice == 8) {
             displayInventory(&InventoryLib);
-        }
+        } else break;
     } while (choice != 0 );
 
     printf(GREEN"   THANK YOU ! SEE NEXT TIME \n"RESET);

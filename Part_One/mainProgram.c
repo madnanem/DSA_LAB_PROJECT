@@ -224,6 +224,9 @@ int main(){
         printf("  4. Display Tasks\n");
         printf("  5. Search Tasks by Priority\n");
         printf("  0. Exit\n");
+
+        printf("\n "RED"   IMPORTANT:"RESET" Don't foget to exit the program in the end. \n");
+
         printf("  Enter your choice: ");
         scanf("%d", &choice);
 
