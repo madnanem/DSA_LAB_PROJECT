@@ -10,7 +10,7 @@
 #define ORANGE "\033[38;5;214m"  // Orange color
 #define GREEN "\033[32m"     // Green color
 #define YELLOW "\033[33m"    // Yellow color
-#define CYAN "\033[36m"      // Cyan color
+#define CYAN "\033[36m"      // Cyan color 
 
 // Task's structure 
 typedef struct Task {
@@ -38,7 +38,6 @@ Task* createTask(int id, const char* description, int priority, char status){
     return NewTask;
 }
 
-// Task Insertion: 
 void insertTask(Task** task, int id, const char* description, int priority, char status){
     if( status != 'P' && status != 'I' && status != 'C' &&
         status != 'p' && status != 'i' && status != 'c'){
@@ -71,7 +70,6 @@ void insertTask(Task** task, int id, const char* description, int priority, char
     current->next = TaskInserted;
 }
 
-// Function to delete a task by its identifier  
 void deleteTask(Task** task, int id){
     if (*task == NULL){
         printf(RED "   The list is empty.\n" RESET);
@@ -102,7 +100,6 @@ void deleteTask(Task** task, int id){
     printf(YELLOW "  Task with ID %d deleted successfully.\n" RESET, id);
 }
 
-// Function to update the status of a task by its ID
 void updateStatus(Task* task, int id, char newStatus){
     if( newStatus != 'P' && newStatus != 'I' && newStatus != 'C' &&
         newStatus != 'p' && newStatus != 'i' && newStatus != 'c'){
@@ -122,7 +119,6 @@ void updateStatus(Task* task, int id, char newStatus){
     printf(RED "   Task with ID %d not found.\n" RESET, id);
 }
 
-// Function to display all tasks grouped by status
 void displayTasks(Task* task){
     Task* current;
 
@@ -175,7 +171,6 @@ void displayTasks(Task* task){
     }
 }
 
-// Function to search and display tasks by priority
 void searchByPriority(Task* task, int priority){
     if (priority < 1 || priority > 5){
         printf(RED "   Priority must be between 1 and 5.\n" RESET);
@@ -198,7 +193,6 @@ void searchByPriority(Task* task, int priority){
     }
 }
 
-// Free Function 
 void freeTask(Task* task){
     Task* temp;
     while(task != NULL){
@@ -237,11 +231,6 @@ int main(){
                 
                 printf("Input Task Description: ");
                 scanf(" %[^\n]", description);  
-                
-                // WE CAN USE SCANF OR THIS LINES : 
-                //  getchar(); // Clear newline from buffer
-                // fgets(description, sizeof(description), stdin);
-                // description[strcspn(description, "\n")] = '\0'; // 
 
                 do {
                     printf("Input Task Priority (1-5): ");
@@ -290,6 +279,7 @@ int main(){
                 break;
             default:
                 printf(RED "   Invalid choice!  Try again (1-6) - 0 to Exit the program.\n" RESET);
+            
         }
     }while( choice != 0 );
 

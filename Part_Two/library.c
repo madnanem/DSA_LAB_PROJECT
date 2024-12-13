@@ -131,7 +131,7 @@ int main() {
         printf("   1. Add New Book\n");
         printf("   2. Borrow Book\n");
         printf("   3. Return Book\n");
-        printf("   4. Process Borrow Requests\n");
+        printf("   4. Process Borrow Requests\n"); 
         printf("   5. View Recently Returned Books\n");
         printf("   6. Display Borrow Request Queue\n");
         printf("   7. Search for a Book\n");
