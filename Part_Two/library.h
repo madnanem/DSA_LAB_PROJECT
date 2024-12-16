@@ -64,8 +64,8 @@ void displayQueue(Queue* queue);
 
 void initInventory(Inventory* inventory);
 void addBook(Inventory* inventory, Book book);
-void borrowBook(Inventory* inventory, Queue* queue, int bookID, User user);
-void returnBook(Stack* stack, Inventory* inventory, int bookID);
+void borrowBook(Inventory* inventory, Queue* queue, int bookID);
+void returnBook(Stack* stack, Inventory* inventory, int bookID, Queue* queue);
 void processRequests(Queue* queue, Stack* stack, Inventory* inventory);
 void searchBook(Inventory* inventory, int bookID);
 void displayInventory(Inventory* inventory);

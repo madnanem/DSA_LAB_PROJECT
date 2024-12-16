@@ -53,7 +53,7 @@ User dequeue(Queue* queue) {
 void displayQueue(Queue* queue) {
     QueueNode* current = queue->head;
     if (!current) {
-        printf("   No users in the borrow request queue.\n");
+        printf(RED"   No users in the borrow request queue.\n"RESET);
         return;
     }
     printf(CYAN" Borrow Request Queue:\n"RESET);

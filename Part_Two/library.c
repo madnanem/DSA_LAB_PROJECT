@@ -14,6 +14,7 @@
 #define YELLOW "\033[33m"    // Yellow color
 #define CYAN "\033[36m"      // Cyan color
 
+static int currentUserID = 1;
 
 void initInventory(Inventory* inventory) {
     inventory->head = NULL;
@@ -25,13 +26,27 @@ void addBook(Inventory* inventory, Book book) {
         printf(RED"   Memory allocation failed!\n"RESET);
         return;
     }
+    NodeInventory* temp = inventory->head;
+    while (temp != NULL) {
+        if (temp->book.bookID == book.bookID) {
+            printf(RED "   BOOK with ID %d already exists. Please use ANOTHER ID (Unique).\n" RESET);
+            return;
+        }
+        temp = temp->next;
+    }
     newNode->book = book;
     newNode->next = inventory->head;
     inventory->head = newNode;
     printf(YELLOW"  Book added successfully: %s by %s\n"RESET, book.title, book.author);
 }
 
-void borrowBook(Inventory* inventory, Queue* queue, int bookID, User user) {
+void borrowBook(Inventory* inventory, Queue* queue, int bookID) {
+    User user;
+    user.userID = currentUserID++;  
+    printf(" Input Name: ");
+    scanf(" %[^\n]", user.name);   
+    user.requestedBookID = bookID; 
+
     NodeInventory* current = inventory->head;
     while (current) {
         if (current->book.bookID == bookID) {
@@ -40,7 +55,6 @@ void borrowBook(Inventory* inventory, Queue* queue, int bookID, User user) {
                 printf(YELLOW"  Book borrowed successfully: %s by %s\n"RESET, current->book.title, current->book.author);
             } else {
                 printf(RED"   Book is currently unavailable. Adding user to the borrow request queue.\n"RESET);
-                user.requestedBookID = bookID;
                 enqueue(queue, user);
             }
             return;
@@ -50,14 +64,26 @@ void borrowBook(Inventory* inventory, Queue* queue, int bookID, User user) {
     printf(RED"   Book with ID %d not found in the inventory.\n"RESET, bookID);
 }
 
-void returnBook(Stack* stack, Inventory* inventory, int bookID) {
+void returnBook(Stack* stack, Inventory* inventory, int bookID, Queue* queue) {
     NodeInventory* current = inventory->head;
     while (current) {
-        if (current->book.bookID == bookID) {
+        if (current->book.bookID == bookID ) {
+          if(current->book.isAvailable == false){
             current->book.isAvailable = true;
             push(stack, current->book);
             printf(YELLOW"  Book returned successfully: %s by %s\n"RESET, current->book.title, current->book.author);
+            if (queue->head) {
+                    User user = dequeue(queue);   
+                    current->book.isAvailable = false;   
+                    printf(CYAN"  Processed request for User: %s (ID: %d). Book borrowed: %s by %s\n"RESET,
+                           user.name, user.userID, current->book.title, current->book.author);
+                }
+                return;
             return;
+        } else {
+            printf(RED"   You can't return this BOOK: %s by %s , it's Already available.\n"RESET,current->book.title,current->book.author);
+            return;
+        }
         }
         current = current->next;
     }
@@ -69,19 +95,36 @@ void processRequests(Queue* queue, Stack* stack, Inventory* inventory) {
         printf(RED"   No users in the borrow request queue.\n"RESET);
         return;
     }
-    User user = dequeue(queue);
-    NodeInventory* current = inventory->head;
-    while (current) {
-        if (current->book.bookID == user.requestedBookID && current->book.isAvailable) {
-            current->book.isAvailable = false;
-            printf(CYAN"  Processed request for User: %s (ID: %d). Book borrowed: %s by %s\n"RESET,
-                   user.name, user.userID, current->book.title, current->book.author);
-            return;
-        }
-        current = current->next;
+    Queue tempQueue;
+    InitQueue(&tempQueue);
+
+    while (queue->head) {
+        User user = dequeue(queue);   
+        enqueue(&tempQueue, user);    
     }
-    printf(ORANGE"   Requested book (ID: %d) is still unavailable for User: %s (ID: %d).\n"RESET,
-           user.requestedBookID, user.name, user.userID);
+
+    QueueNode* temp = tempQueue.head;
+    while (temp) {
+        User user = temp->user;    
+        NodeInventory* current = inventory->head;
+        while (current) {
+            if (current->book.bookID == user.requestedBookID && current->book.isAvailable) {
+                current->book.isAvailable = false;
+                printf(CYAN"  Processed request for User: %s (ID: %d). Book borrowed: %s by %s\n"RESET,
+                   user.name, user.userID, current->book.title, current->book.author);
+                return;
+            }
+            current = current->next;
+        }
+        printf(ORANGE"   Requested book (ID: %d) is still unavailable for User: %s (ID: %d).\n"RESET,
+           user.requestedBookID, user.name, user.userID); 
+        temp = temp->next;
+    }
+
+    while (tempQueue.head) {
+        User user = dequeue(&tempQueue);
+        enqueue(queue, user);   
+    }   
 }
 
 void searchBook(Inventory* inventory, int bookID) {
@@ -105,13 +148,21 @@ void displayInventory(Inventory* inventory) {
         printf(RED"   Inventory is empty.\n"RESET);
         return;
     }
-    printf(CYAN" Library Inventory:\n"RESET);
+    printf(CYAN"\n Library Inventory:\n"RESET);
+    printf("\n");
+
+    printf("%-15s %-25s %-20s %-10s\n", "Book ID", "Title", "Author", "Status");
+    printf("------------------------------------------------------------------------\n");
+
     while (current) {
-        printf(GREEN"   Book ID: %d,\t Title: %s,\t Author: %s,\t Status: %s\n"RESET,
-               current->book.bookID, current->book.title, current->book.author,
-               current->book.isAvailable ? "Available" : "Borrowed");
+        printf(GREEN"%-15d %-25s %-20s %-10s\n"RESET, 
+            current->book.bookID, 
+            current->book.title, 
+            current->book.author, 
+            current->book.isAvailable ? "Available" : "Borrowed");
         current = current->next;
     }
+    printf("\n");
 }
 
 
@@ -122,7 +173,7 @@ int main() {
     Queue borrowRequests;
 
     initInventory(&InventoryLib);
-    InitStack(&recentlyReturned);
+    InitStack(&recentlyReturned); 
     InitQueue(&borrowRequests);
 
     int choice;
@@ -154,20 +205,15 @@ int main() {
             book.isAvailable = true;
             addBook(&InventoryLib, book);
         } else if (choice == 2) {
-            User user;
             int bookID;
-            printf(" Input User ID: ");
-            scanf("%d", &user.userID);
-            printf(" Input Name: ");
-            scanf(" %[^\n]", user.name);
             printf(" Input Requested Book ID: ");
             scanf("%d", &bookID);
-            borrowBook(&InventoryLib, &borrowRequests, bookID, user);
+            borrowBook(&InventoryLib, &borrowRequests, bookID);
         } else if (choice == 3) {
             int bookID;
             printf(" Input Book ID to return : ");
             scanf("%d", &bookID);
-            returnBook(&recentlyReturned, &InventoryLib, bookID);
+            returnBook(&recentlyReturned, &InventoryLib, bookID, &borrowRequests);
         } else if (choice == 4) {
             processRequests(&borrowRequests, &recentlyReturned, &InventoryLib);
         } else if (choice == 5) {
